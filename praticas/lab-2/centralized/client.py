@@ -20,7 +20,7 @@ while True:
 		if socks == read_sockets:
 			message = server.recv(2048)
 			if message:
-				print(message)
+				print(message.decode("utf-8"))
 		else:
 			message = sys.stdin.readline()
 			server.send(message.encode())
