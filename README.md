@@ -11,7 +11,7 @@ Para a execução das implementações utilize:
 * seu IDE de preferência (sugestão VS Code)
 * Python 3 >
 
-## Implementações ED2
+## Implementations 
 * Laboratório 1: Cliente-Servidor
 * Laboratório 2: Peer-to-Peer (P2P)
   - python chat.py 
