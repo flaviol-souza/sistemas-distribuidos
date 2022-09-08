@@ -11,4 +11,5 @@ if __name__ == '__main__':
     task()
     end_time = perf_counter()
 
-    print(f'It took {end_time - start_time: 0.2f} second(s) to complete.')
+    #print(f'It took {end_time - start_time: 0.2f} second(s) to complete.')
+    print('It took {:0.2f} second(s) to complete.'.format(end_time - start_time))
