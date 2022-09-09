@@ -1,10 +1,16 @@
-import requests
+#import requests
+from http.client import HTTPSConnection
 import json
 from time import perf_counter
 
 def getLegend():    
-    resp = requests.get('https://api.chucknorris.io/jokes/random')
-    respJson = json.loads(resp.text)
+    #resp = requests.get('https://api.chucknorris.io/jokes/random')
+    http = HTTPSConnection('api.chucknorris.io',443)
+    http.request('GET', '/jokes/random')
+    resp = http.getresponse()
+    jsonB = resp.read()
+    jsonStr = jsonB.decode('utf-8')
+    respJson = json.loads(jsonStr)
     print(respJson["value"])
     return respJson["value"]
 
