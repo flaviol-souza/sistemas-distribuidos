@@ -1,5 +1,4 @@
 import socket
-import select
 import sys
 from _thread import *
 
@@ -29,7 +28,6 @@ def clientthread(conn, addr):
 					broadcast(message_to_send, conn)
 				else:
 					remove(conn)
-
 			except:
 				continue
 
