@@ -41,12 +41,10 @@ def main():
     consumer_thread.start()
 
     producer_thread.join()
-
-    queue.join()
+    consumer_thread.join()
     
     end_time = perf_counter()
     print(f'\nIt took {end_time- start_time :0.2f} second(s) to complete.')
-
 
 if __name__ == '__main__':
     main()
