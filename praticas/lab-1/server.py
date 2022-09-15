@@ -31,14 +31,24 @@ while True:
 
         if data.startswith('GET'):
             # GET request
-            conn.send('HTTP/1.0 404 Not Found\r\n'.encode())
+            #conn.send('HTTP/1.0 404 Not Found\r\n'.encode())
+            conn.send('HTTP/1.0 200 OK\n'.encode())
+            conn.send('Content-Type: text/html\n'.encode())
+            conn.send('\n'.encode()) # header and body should be separated by additional newline
+            conn.send("""
+                <html>
+                <body>
+                <h1>Hello World</h1> this is my server!
+                </body>
+                </html>
+            """.encode()) # Use triple-quote string.
         else:
             # other type of HTTP request
             conn.send('HTTP/1.0 501 Not implemented\r\n')
             
         now = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
         conn.send(('Date: ' + now +'\r\n').encode())
-        conn.send('Server: Dummy-HTTP-Server\r\n'.encode())
+        conn.send('Server: IFSP Lab SD Server\r\n'.encode())
         conn.send('\r\n'.encode())
         conn.shutdown(socket.SHUT_RDWR)
         conn.close()

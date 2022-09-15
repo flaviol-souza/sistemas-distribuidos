@@ -14,8 +14,8 @@ hostname = sys.argv[1]
 if _len_arg == 3:
     port = int(sys.argv[2])
 else:
-    print("Usage default web port: 80")
-    port = 80
+    print("Usage default web port: 8080")
+    port = 8080
 
 READBUF = 16384
 s = None
