@@ -3,8 +3,6 @@ import json
 import time
 import threading
 import socket
-import sys
-from xxlimited import Str 
 from datetime import datetime
 
 import udp as pu 
@@ -26,9 +24,6 @@ class Node:
         while True:
             data, addr = pu.recembase(self.udp_socket)
             action = json.loads(data)
-            # print(action["type"])
-        #     self.dispatch(action, addr)
-        # def dispatch(self, action,addr):
             if action['type'] == 'newpeer':
                 self.peers[action['data']] = addr
                 pu.sendJS(self.udp_socket, addr, {
