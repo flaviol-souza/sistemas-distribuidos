@@ -1,8 +1,10 @@
+#!/usr/bin/python3
+
 import socket
 import sys
+
 buffer_size = 4096
 forward_to = ('ifsp.edu.br', 80)
-
 
 class Forward:
     def __init__(self):
@@ -15,7 +17,6 @@ class Forward:
         except Exception as e:
             print(e)
             return False
-
 
 class Proxy:
     input_list = []
