@@ -21,6 +21,6 @@ Para a execução das implementações utilize:
 * Laboratório 3: Proxy
   - python proxy.py
   - python echo-api.py
-* Laboratório 4: 
+* Laboratório 4 :Tipos de Middleware
 * Laboratório 5: Threads (Sequencial, Pseudo-Paralelo e Concorrente)
 * Laboratório 6: Concorrência e Paralelismo (IO-Bound e CPU-Bound) 
