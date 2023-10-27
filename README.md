@@ -24,3 +24,4 @@ Para a execução das implementações utilize:
 * Laboratório 4 :Tipos de Middleware
 * Laboratório 5: Threads (Sequencial, Pseudo-Paralelo e Concorrente)
 * Laboratório 6: Concorrência e Paralelismo (IO-Bound e CPU-Bound) 
+* Laboratório 7: Virtualização (Docker, Docker-Compose, Load-Balance, Stress Test)
