@@ -1,110 +1,108 @@
-import argparse
-import json 
-import time
-import threading
-import socket
+import socket, argparse, time, threading, udp
 from datetime import datetime
 
-import udp as pu 
-
 IP = "127.0.0.1"
-PORT = 8891
+PORT = 8080
 
 class Node:
-    seed = (IP, PORT)
+    id_node = ""
+    host = None
+    seed = None
     peers = {}
-    idNode = ""
-    udp_socket = {}
+    sockets = {}
 
-    def __init__(self, ip, port, idNode):
-        #self.seed = (ip, port)
-        self.idNode = idNode
+    def __init__(self, id, ip, port, ip_host, port_host):
+        self.id_node = id
+        self.seed = (ip, port)
+        self.host = (ip_host, port_host)
 
+    def start(self):
+        if self.host[0] == None: #node is host!
+            self.peers[self.id_node] = self.seed
+        else: #node is node!
+            udp.send_json(self.sockets, self.host, {
+                "type" : "newpeer",
+                "data" : self.id_node
+            })
+
+        t_receive = threading.Thread(target=self.receive, args=())
+        t_send = threading.Thread(target=self.send, args=())
+
+        t_receive.start()
+        t_send.start()
+    
     def receive(self):
         while True:
-            data, addr = pu.recembase(self.udp_socket)
-            action = json.loads(data)
-            if action['type'] == 'newpeer':
-                self.peers[action['data']] = addr
-                pu.sendJS(self.udp_socket, addr, {
-                    "type":'peers',
-                    "data":self.peers
-                })         
+            peer_addr, peer_json = udp.receive_json(self.sockets)
 
-            if action['type'] == 'peers':
-                self.peers.update(action['data'])
-                pu.broadcastJS(self.udp_socket, {
-                    "type":"introduce",
-                    "data": self.idNode
-                },self.peers) 
+            if peer_json['type'] == 'newpeer':
+                self.peers[peer_json['data']] = peer_addr
+                udp.send_json(self.sockets, peer_addr, {
+                    "type" : "peers",
+                    "data" : self.peers
+                })
 
-            if action['type'] == 'introduce':
-                print(action['data'] + " entrou no chat IFSP P2P")
-                self.peers[action['data']] = addr   
+            if peer_json['type'] == 'peers':
+                self.peers.update(peer_json['data'])
+                udp.broadcast_json(self.sockets, self.peers, {
+                    'type':'introduce',
+                    'data': self.id_node
+                })
 
-            if action['type'] == 'input':
+            if peer_json['type'] == 'introduce':
+                print(peer_json['data'] + ' entrou no IFSP Chat P2P!')
+                self.peers[peer_json['data']] = peer_addr
+
+            if peer_json['type'] == 'input':
                 now = datetime.now()
-                date_time = now.strftime("%m/%d/%y, %H:%M")
-                print("["+date_time+"] <"+action['user']+">  "+action['data'])  
+                date_time_format = now.strftime('%m/%d/%y, %H:%M')
+                print("["+date_time_format+"] <"+peer_json['user']+"> "+peer_json['data'])
 
-            if action['type'] == 'exit':
-                if(self.idNode == action['data']):
-                    time.sleep(0.5) 
-                    break;
-                value, key = self.peers.pop(action['data'])
-                print( action['data'] + " saiu do chat IFSP P2P.")          
-            
-    def startPeer(self):
-        pu.sendJS(self.udp_socket, self.seed, {
-            "type": "newpeer",
-            "data": self.idNode
-        })
+            if peer_json['type'] == 'exit':
+                if self.id_node == peer_json['data']:
+                    time.sleep(0.5)
+                    break
+                self.peers.pop(peer_json['data'])
+                print(peer_json['data'] + " say: see you guys!")
 
     def send(self):
-        while True: 
-            msg_input = input("$:")
-            if msg_input == "exit":
-                pu.broadcastJS(self.udp_socket, {
-                    "type":"exit",
-                    "data":self.idNode
-                },self.peers)
-                break    
+        while True:
+            message = input('$:')
 
-            if msg_input == "friends":
-                print(self.peers) 
-                continue      
+            if message == 'exit':
+                udp.broadcast_json(self.sockets, self.peers, {
+                    'type':'exit',
+                    'data': self.id_node
+                })
+                break
 
-            pu.broadcastJS(self.udp_socket, {
-                "type": "input",
-                "user": self.idNode,
-                "data": msg_input
-            }, self.peers) 
+            udp.broadcast_json(self.sockets, self.peers, {
+                'type' : 'input',
+                'user' : self.id_node,
+                'data' : message
+            })
+        
+##### END NODE CLASS
 
 def arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--NICK', '-n', help='Nick, Default: IFSP anonymous', type= str, default='IFSP anonymous')
-    parser.add_argument('--IP', '-ip', help='IP, Default: '+IP, type= str, default=IP)
-    parser.add_argument('--PORT', '-p', help='Port, Default: '+str(PORT), type= int, default= PORT)
+    parser.add_argument('--NICK', '-n', type=str, default='IFSP Anonymous', help='Define nickname, Default: IFSP Anonymous')
+    parser.add_argument('--IP', '-ip', type=str, default=IP, help='Define IP Node, Default:'+str(IP))
+    parser.add_argument('--PORT', '-p', type=int, default=PORT, help='Define PORT Node, Default:'+str(PORT))
+    parser.add_argument('--IP_HOST', '-iph', type=str, help='Define IP Host')
+    parser.add_argument('--PORT_HOST', '-poh', type=int, default=PORT, help='Define PORT Host, Default:'+str(PORT))
 
-    args = parser.parse_args()
-
-    return args
+    arg = parser.parse_args()
+    return arg
 
 def main(args):
-    udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    udp_socket.bind((args.IP, args.PORT))
-    peer = Node(args.IP, args.PORT, args.NICK)
-    peer.udp_socket = udp_socket
-    
-    peer.startPeer()
-    
-    t1 = threading.Thread(target=peer.receive, args=())
-    t2 = threading.Thread(target=peer.send, args=())
+    peer_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    peer_socket.bind((args.IP, args.PORT))
+    peer = Node(args.NICK, args.IP, args.PORT, args.IP_HOST, args.PORT_HOST)
+    peer.sockets = peer_socket
 
-    t1.start()
-    t2.start()
-
+    peer.start()
 
 if __name__ == '__main__':
     args = arguments()
-    main(args)           
+    main(args)

@@ -1,0 +1,80 @@
+version: '3.3'
+
+services:
+
+  database:
+    container_name: database
+    build:
+      context: .
+      dockerfile: Dockerfile.mysql
+    environment:
+      - PORT=3306
+    restart: unless-stopped
+    networks:
+      - loadbalancing
+
+  app_1:
+    container_name: app_1
+    build:
+      context: .
+      dockerfile: Dockerfile.app  
+    depends_on:
+      - database
+    environment:
+      - PORT=8181 
+    networks:
+      - loadbalancing
+
+  app_2:
+    container_name: app_2
+    build:
+      context: .
+      dockerfile: Dockerfile.app  
+    depends_on:
+      - database
+    environment:
+      - PORT=8181 
+    networks:
+      - loadbalancing
+
+  app_3:
+    container_name: app_3
+    build:
+      context: .
+      dockerfile: Dockerfile.app 
+    depends_on:
+      - database
+    environment:
+      - PORT=8181 
+    networks:
+      - loadbalancing
+
+  nginx:
+    container_name: nginx
+    build: 
+      context: .
+      dockerfile: Dockerfile.nginx 
+    ports:
+      - "80:80"
+    networks:
+      - loadbalancing
+    depends_on:
+      - app_1
+      - app_2
+      - app_3
+
+  cadvisor:
+    image: google/cadvisor
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - loadbalancing
+
+networks:
+  loadbalancing:

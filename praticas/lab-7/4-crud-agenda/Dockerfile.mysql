@@ -1,0 +1,8 @@
+FROM mariadb:10.7
+
+ENV MYSQL_DATABASE crud_flask
+ENV MYSQL_USER dev
+ENV MYSQL_PASSWORD dev
+ENV MYSQL_ROOT_PASSWORD root
+
+COPY database/ /docker-entrypoint-initdb.d/

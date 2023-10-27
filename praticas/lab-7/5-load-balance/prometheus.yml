@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 15s # Frequência de coleta de métricas
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prometheus:9090'] # Endereço do próprio Prometheus
+
+  - job_name: 'app'
+    static_configs:
+      - targets: ['app:80'] # Substitua 'your_app' pelo nome do serviço do seu aplicativo

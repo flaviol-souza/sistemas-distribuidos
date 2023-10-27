@@ -1,0 +1,4 @@
+FROM python:slim
+WORKDIR /app/
+COPY ./client.py .
+CMD ["python", "/app/client.py"]
